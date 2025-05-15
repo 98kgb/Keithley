@@ -34,3 +34,6 @@ print("측정 전류 (A):", current)
 
 #%% 출력 OFF
 inst.write("smua.source.output = smua.OUTPUT_OFF")
+
+
+# 이렇게 수정했다 치면
