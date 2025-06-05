@@ -40,8 +40,7 @@ def apply_V(inst, ch_name, v, v_assigned, char_type):
     inst.write(f"smu{ch_name}.source.func = smu{ch_name}.OUTPUT_DCVOLTS")
     inst.write(f"smu{ch_name}.source.levelv = {v_assigned if isinstance(v_assigned, (int, float)) else v}")
     inst.write(f"smu{ch_name}.source.limiti = 1e-4")
-    inst.write(f"smu{ch_name}.source.delay = {0.06 if char_type == 'output' else 0.04}")
-    inst.write(f"smu{ch_name}.measure.nplc = {3 if char_type == 'output' else 2}")
+    inst.write(f"smu{ch_name}.measure.nplc = 5")
     inst.write(f"smu{ch_name}.measure.rangei = 1e-5")  # expectation range
     inst.write(f"smu{ch_name}.source.output = smu{ch_name}.OUTPUT_ON")
 
@@ -49,8 +48,7 @@ def apply_I(inst, ch_name, i, i_assigned, char_type):
     inst.write(f"smu{ch_name}.source.func = smu{ch_name}.OUTPUT_DCAMPS")
     inst.write(f"smu{ch_name}.source.leveli = {i_assigned if isinstance(i_assigned, (int, float)) else i}")
     inst.write(f"smu{ch_name}.source.limiti = 1e-4")
-    inst.write(f"smu{ch_name}.source.delay = {0.06 if char_type == 'output' else 0.04}")
-    inst.write(f"smu{ch_name}.measure.nplc = {3 if char_type == 'output' else 2}")
+    inst.write(f"smu{ch_name}.measure.nplc = 5")
     inst.write(f"smu{ch_name}.measure.rangev = 1e1")  # expectation range
     inst.write(f"smu{ch_name}.source.output = smu{ch_name}.OUTPUT_ON")
 
@@ -73,13 +71,13 @@ Each mode number corresponding to:
 2: invertor 2
 """
 
-mode = 1 ## insert measurement mode ##
-saving = True
+mode = 2 ## insert measurement mode ##
+saving = False
 saving_name = 'AH1_10um'
 
 for mode in range(1,3):
         
-    v_range = np.arange(0, -15, -0.5)
+    v_range = np.arange(0.2, -10, -0.2)
     v_fixed = -10
     # Define sweep voltage for each channel.
     
@@ -137,7 +135,7 @@ for mode in range(1,3):
     
     # Visualization of result
     
-    plt.plot(measures[:, 0], measures[:, 1], label = '5 MOhm', marker='o', color='k')
+    plt.plot(measures[:, 0], measures[:, 1], marker='o', color='k')
     if mode == 1:
         plt.xlabel('Vmem (V)', fontsize=15)
         plt.ylabel('Vc (V)', fontsize=15)
@@ -147,7 +145,6 @@ for mode in range(1,3):
 
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
-    plt.legend(loc='best', fontsize=12)
     plt.grid(True)
     plt.tight_layout()
     plt.show()
