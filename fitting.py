@@ -57,6 +57,7 @@ else:
         plt.ylabel('$I_{DS}$ (A)')
         plt.grid()
         plt.legend()
+
 #%%
 mode = 4
 v_fix_list = [-4,-6,-8,-10]
