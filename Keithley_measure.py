@@ -71,7 +71,7 @@ def apply_V(inst, ch_name, v, v_assigned, char_type, prev_I):
     print('NPLC: ',5 if abs(prev_I) > 5e-8 else 10)
     inst.write(f"smu{ch_name}.source.func = smu{ch_name}.OUTPUT_DCVOLTS")
     inst.write(f"smu{ch_name}.source.levelv = {v_assigned if isinstance(v_assigned, (int, float)) else v}")
-    inst.write(f"smu{ch_name}.source.limiti = 1e-4")
+    inst.write(f"smu{ch_name}.source.limiti = 1e-5")
     inst.write(f"smu{ch_name}.measure.nplc = {5 if abs(prev_I) > 5e-8 else 10}")
     inst.write(f"smu{ch_name}.measure.rangei = 1e-5")  # expectation range
     inst.write(f"smu{ch_name}.source.output = smu{ch_name}.OUTPUT_ON")
@@ -99,21 +99,23 @@ Each mode number corresponding to:
 5: Measuring transistor 1
 """
 
-mode = 3 ## insert measurement mode ##
-char_type = 'output' ## insert measurement characteristics (output or transfer)##
+mode = 4 ## insert measurement mode ##
+char_type = 'transfer' ## insert measurement characteristics (output or transfer)##
 saving = True
 saving_name = 'AH1_10um'
+v_fix_list = [-4,-6,-8,-10]
 
-for mode in range(2,3):
+for v_fix in v_fix_list:
     if mode <= 2:
         char_list = ['output']
         v_range = np.arange(-2, 2, 0.1)
         v_fixed = None
     else:
-        char_list = ['output', 'transfer']
-        v_range = np.arange(0, -10, -0.2)
-        v_fixed = -10
+        char_list = ['transfer']
+        # v_range = np.concatenate([np.arange(0, -10, -0.1), np.arange(-9.9, 0, 0.2)]) # input for forward and inverse
+        v_range = np.arange(0.1, -4, -0.1)
         
+        v_fixed = v_fix        
     for char_type in char_list:    
         
         # Define sweep voltage for each channel.
@@ -178,7 +180,7 @@ for mode in range(2,3):
             di = measures[1:,1] - measures[:len(measures)-1,1]
             R = np.mean(dv/di)
             plt.title(f'R{mode}')
-            plt.plot(measures[:, 0], measures[:, 1], label = f'{R*1e-9:.2f} GOhm', marker='o', color='k')
+            plt.plot(measures[1:, 0], measures[1:, 1], label = f'{R*1e-9:.2f} GOhm', marker='o', color='k')
             plt.xlabel('V (V)', fontsize=15)
             plt.ylabel('I (A)', fontsize=15)
         else:
@@ -186,12 +188,12 @@ for mode in range(2,3):
 
             if char_type == 'output':
                 plt.title(f'{Tr_name[mode-3]}')
-                plt.plot(measures[:, 0], measures[:, 1], label=f"Vgs = {v_fixed}V", marker='o', color='red')
+                plt.plot(measures[1:, 0], measures[1:, 1], label=f"Vgs = {v_fixed}V", marker='o', color='red')
                 plt.xlabel('Vds (V)', fontsize=15)
                 plt.ylabel('Ids (A)', fontsize=15)
             elif char_type == 'transfer':
                 plt.title(f'{Tr_name[mode-3]}')
-                plt.semilogy(measures[:, 0], abs(measures[:, 1]), label=f"Vds = {v_fixed}V", marker='o', color='blue')
+                plt.semilogy(measures[1:, 0], abs(measures[1:, 1]), label=f"Vds = {v_fixed}V", marker='o', color='blue')
                 plt.xlabel('Vgs (V)', fontsize=15)
                 plt.ylabel('Ids (A)', fontsize=15)
         
@@ -219,5 +221,7 @@ for mode in range(2,3):
                 column = 'Vgs' if char_type == 'output' else 'Vds'
                 df = pd.DataFrame(measures, columns=columns)
                 df[f'{column}'] = v_fixed
-                df.to_csv(f'{save_dir}\\{saving_name}_{Tr_name[mode-3]}_{char_type}.csv')    
+                df.to_csv(f'{save_dir}\\{saving_name}_{Tr_name[mode-3]}_{char_type}_{v_fix}.csv')    
             print("Data saved.")
+
+

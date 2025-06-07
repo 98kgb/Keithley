@@ -75,7 +75,6 @@ mode = 2 ## insert measurement mode ##
 saving = False
 saving_name = 'AH1_10um'
 
-for mode in range(1,3):
         
     v_range = np.arange(0.2, -10, -0.2)
     v_fixed = -10
